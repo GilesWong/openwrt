@@ -1,0 +1,9 @@
+#!/bin/sh /etc/rc.common
+START=99
+
+start() {
+    [ -f /etc/natfrp-installed ] && return 0
+    opkg install --force-depends /natfrp/luci-app-natfrp.ipk
+    rm -rf /natfrp
+    touch /etc/natfrp-installed
+}
