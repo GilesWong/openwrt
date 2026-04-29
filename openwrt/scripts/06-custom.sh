@@ -2,11 +2,6 @@
 
 ### Add new packages or patches below
 
-# openlist - multi-package repo, extract only luci-app-openlist2
-git clone --depth=1 https://$github/sbwml/luci-app-openlist2 /tmp/luci-app-openlist2
-cp -r /tmp/luci-app-openlist2/luci-app-openlist2 package/new/luci-app-openlist2
-rm -rf /tmp/luci-app-openlist2
-
 # lrzsz - add patched package (single-package repo, root IS package)
 rm -rf feeds/packages/utils/lrzsz
 git clone --depth=1 https://$github/sbwml/packages_utils_lrzsz package/new/lrzsz

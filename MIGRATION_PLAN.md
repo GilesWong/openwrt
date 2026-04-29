@@ -409,11 +409,6 @@ CONFIG_PACKAGE_luci-app-natfrp=y            # 从源编译（见第六阶段 nat
 ```bash
 #!/bin/bash -e
 
-# openlist - multi-package repo, extract only luci-app-openlist2
-git clone --depth=1 https://$github/sbwml/luci-app-openlist2 /tmp/luci-app-openlist2
-cp -r /tmp/luci-app-openlist2/luci-app-openlist2 package/new/luci-app-openlist2
-rm -rf /tmp/luci-app-openlist2
-
 # lrzsz - add patched package (single-package repo, root IS package)
 rm -rf feeds/packages/utils/lrzsz
 git clone --depth=1 https://$github/sbwml/packages_utils_lrzsz package/new/lrzsz
@@ -530,7 +525,7 @@ openwrt/
 ├── 23-config-common-base        ← 新文件：基础系统配置（含 LuCI/内核/工具）
 ├── 23-config-common-custom      ← 修改：APP 选择（去 pmkol 化 + 新增 nikki/natfrp）
 ├── scripts/
-│   └── 06-custom.sh             ← 修改：保留 openlist/lrzsz，新增 mosdns/tailscale-ng/eqosplus/netspeedtest + natfrp
+│   └── 06-custom.sh             ← 修改：保留 lrzsz，新增 mosdns/tailscale-ng/eqosplus/netspeedtest + natfrp
 ├── files/
 │   ├── root/                    ← 保留 .bash_profile, .bashrc
 │   └── etc/                     ← 保留 sysctl.d, 删除 emmc-install, 删除旧 tailscale hotplug
@@ -598,4 +593,3 @@ openwrt/
 
 ### 待决策
 - [ ] `natfrp` 方案：从源编译 (git clone repo) vs 预编译 IPK 注入 (files/natfrp/ + init.d)
-- [ ] `openlist` (luci-app-openlist2)：确认是否需要在 custom config 中启用（当前默认 disable）
