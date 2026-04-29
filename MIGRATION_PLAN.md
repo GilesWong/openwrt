@@ -202,10 +202,11 @@ CONFIG_PACKAGE_kmod-nft-fullcone=y
 CONFIG_PACKAGE_zram-swap=y
 
 ### Curl (HTTP3/QUIC)
+# ImmortalWrt 用 libngtcp2 实现 QUIC，只需一个 CONFIG_LIBCURL_HTTP3 选项
+# libnghttp3 + libngtcp2 作为依赖自动拉取，无需打 OpenSSL QUIC 补丁
 CONFIG_PACKAGE_curl=y
 CONFIG_PACKAGE_libcurl=y
-CONFIG_LIBCURL_NGHTTP3=y
-CONFIG_LIBCURL_NGTCP2=y
+CONFIG_LIBCURL_HTTP3=y
 CONFIG_LIBCURL_OPENSSL=y
 
 ### Dnsmasq
