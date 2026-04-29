@@ -1,8 +1,6 @@
 #!/bin/bash -e
 
 ### Add new packages or patches below
-### For example, download openlist from a third-party repository to package/new/openlist
-### Then, add CONFIG_PACKAGE_luci-app-openlist2=y to the end of openwrt/23-config-common-custom
 
 # openlist - add new package
 git clone https://$github/sbwml/luci-app-openlist2 package/new/openlist
@@ -11,18 +9,24 @@ git clone https://$github/sbwml/luci-app-openlist2 package/new/openlist
 rm -rf feeds/packages/utils/lrzsz
 git clone https://$github/sbwml/packages_utils_lrzsz package/new/lrzsz
 
-# vlmcsd - add new package
-git clone https://$github/mchome/openwrt-vlmcsd package/new/vlmcsd
-git clone https://$github/mchome/luci-app-vlmcsd package/new/luci-app-vlmcsd
+# mosdns LuCI (mosdns backend is in ImmortalWrt packages)
+git clone https://$github/sbwml/luci-app-mosdns -b v5 package/new/mosdns
 
-# natfrp - download prebuilt ipk, inject into rootfs for first-boot install
+# tailscale-ng LuCI (tailscale backend is in ImmortalWrt packages)
+git clone https://$github/vad-b/luci-app-tailscale-ng package/new/luci-app-tailscale-ng
+
+# eqosplus LuCI
+git clone https://$github/sirpdboy/luci-app-eqosplus package/new/luci-app-eqosplus
+
+# netspeedtest LuCI
+git clone https://$github/sirpdboy/netspeedtest package/new/netspeedtest
+
+# natfrp - prebuilt IPK injection (official recommendation)
 mkdir -p files/natfrp
 if [ "$platform" = "x86_64" ]; then
     natfrp_arch="amd64"
-elif [ "$platform" = "rk3568" ]; then
-    natfrp_arch="arm64"
-elif [ "$platform" = "rk3399" ]; then
-    natfrp_arch="armv7"
+else
+    natfrp_arch="amd64"
 fi
 natfrp_ver=$(curl -s https://nya.globalslb.net/natfrp/client/launcher-openwrt/ | grep -oE '[0-9]+\.[0-9]+\.[0-9]+(?=/)' | sort -V | tail -n 1)
 natfrp_ver=${natfrp_ver:-"3.1.7"}
