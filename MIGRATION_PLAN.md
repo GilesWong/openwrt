@@ -238,6 +238,10 @@ CONFIG_PACKAGE_libopenssl-conf=y
 CONFIG_PACKAGE_libopenssl-legacy=y
 CONFIG_PACKAGE_openssl-util=y
 
+### ustream SSL
+CONFIG_PACKAGE_libustream-openssl=y
+# CONFIG_PACKAGE_libustream-mbedtls is not set
+
 ### 内核模块
 CONFIG_PACKAGE_kmod-br-netfilter=y
 CONFIG_PACKAGE_kmod-button-hotplug=y
@@ -249,6 +253,7 @@ CONFIG_PACKAGE_kmod-fs-ntfs3=y
 CONFIG_PACKAGE_kmod-fs-vfat=y
 CONFIG_PACKAGE_kmod-fs-xfs=y
 CONFIG_PACKAGE_kmod-hwmon-pwmfan=y
+CONFIG_PACKAGE_kmod-thermal=y
 CONFIG_PACKAGE_kmod-ikconfig=y
 CONFIG_PACKAGE_kmod-inet-diag=y
 CONFIG_PACKAGE_kmod-iptunnel6=y
@@ -432,6 +437,8 @@ git clone --depth=1 https://$github/sbwml/packages_utils_lrzsz package/new/lrzsz
 git clone --depth=1 https://$github/sbwml/luci-app-mosdns -b v5 /tmp/luci-app-mosdns
 cp -r /tmp/luci-app-mosdns/luci-app-mosdns package/new/luci-app-mosdns
 rm -rf /tmp/luci-app-mosdns
+# remove v2dat dependency (v2dat is not in our build scope)
+sed -i '/+v2dat/d' package/new/luci-app-mosdns/Makefile
 
 # tailscale-ng LuCI（单包仓库，root 即为包）
 git clone --depth=1 https://$github/vad-b/luci-app-tailscale-ng package/new/luci-app-tailscale-ng
@@ -444,6 +451,8 @@ git clone --depth=1 https://$github/sirpdboy/luci-app-eqosplus package/new/luci-
 git clone --depth=1 https://$github/sirpdboy/netspeedtest /tmp/netspeedtest
 cp -r /tmp/netspeedtest/luci-app-netspeedtest package/new/luci-app-netspeedtest
 rm -rf /tmp/netspeedtest
+# remove unneeded dependencies (homebox & ookla-speedtest)
+sed -i '/+ookla-speedtest/d; /+homebox/d' package/new/luci-app-netspeedtest/Makefile
 
 # socat — 暂不集成
 ```

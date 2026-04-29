@@ -11,6 +11,8 @@ git clone --depth=1 https://$github/sbwml/packages_utils_lrzsz package/new/lrzsz
 git clone --depth=1 https://$github/sbwml/luci-app-mosdns -b v5 /tmp/luci-app-mosdns
 cp -r /tmp/luci-app-mosdns/luci-app-mosdns package/new/luci-app-mosdns
 rm -rf /tmp/luci-app-mosdns
+# remove v2dat dependency (v2dat is not in our build scope)
+sed -i '/+v2dat/d' package/new/luci-app-mosdns/Makefile
 
 # tailscale-ng LuCI (single-package repo)
 git clone --depth=1 https://$github/vad-b/luci-app-tailscale-ng package/new/luci-app-tailscale-ng
@@ -23,6 +25,8 @@ git clone --depth=1 https://$github/sirpdboy/luci-app-eqosplus package/new/luci-
 git clone --depth=1 https://$github/sirpdboy/netspeedtest /tmp/netspeedtest
 cp -r /tmp/netspeedtest/luci-app-netspeedtest package/new/luci-app-netspeedtest
 rm -rf /tmp/netspeedtest
+# remove unneeded dependencies (homebox & ookla-speedtest are not in build scope)
+sed -i '/+ookla-speedtest/d; /+homebox/d' package/new/luci-app-netspeedtest/Makefile
 
 # natfrp - prebuilt IPK injection (official recommendation)
 mkdir -p files/natfrp
