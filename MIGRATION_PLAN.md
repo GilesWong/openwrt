@@ -90,6 +90,11 @@
    - 下载 `23-config-common-custom`（APP 选择）
    - 追加内联编译选项
 9. `make defconfig && make -j$(nproc+1)`
+   - ⚠️ 在 `make defconfig` 之后需执行：
+     ```
+     sed -i '/CONFIG_PACKAGE_libustream-mbedtls=y/d' .config
+     ```
+     原因：`luci-ssl` 默认依赖 `libustream-mbedtls`，`make defconfig` 会强制启用它。但 `wpad-openssl` 已拉入 `libustream-openssl`，两者同名文件冲突。删除 mbedtls 行后，`luci-ssl` 会退而使用 openssl 版本。
 
 ### 移除的 pmkol 特性
 
@@ -238,10 +243,6 @@ CONFIG_PACKAGE_libopenssl-conf=y
 CONFIG_PACKAGE_libopenssl-legacy=y
 CONFIG_PACKAGE_openssl-util=y
 
-### ustream SSL
-CONFIG_PACKAGE_libustream-openssl=y
-# CONFIG_PACKAGE_libustream-mbedtls is not set
-
 ### 内核模块
 CONFIG_PACKAGE_kmod-br-netfilter=y
 CONFIG_PACKAGE_kmod-button-hotplug=y
@@ -252,8 +253,7 @@ CONFIG_PACKAGE_kmod-fs-f2fs=y
 CONFIG_PACKAGE_kmod-fs-ntfs3=y
 CONFIG_PACKAGE_kmod-fs-vfat=y
 CONFIG_PACKAGE_kmod-fs-xfs=y
-CONFIG_PACKAGE_kmod-hwmon-pwmfan=y
-CONFIG_PACKAGE_kmod-thermal=y
+# CONFIG_PACKAGE_kmod-hwmon-pwmfan is not set
 CONFIG_PACKAGE_kmod-ikconfig=y
 CONFIG_PACKAGE_kmod-inet-diag=y
 CONFIG_PACKAGE_kmod-iptunnel6=y
@@ -582,6 +582,9 @@ openwrt/
 - [ ] `yq` 包：确认 ImmortalWrt 24.10 feeds 中是否包含（nikki 硬依赖，缺失则编译失败）
 - [ ] `apk` vs `opkg`：确认 ImmortalWrt 24.10 的包管理器模式，及对 `kmod-*` 命名的影响
 - [ ] Shortcut-FE 包名：`make menuconfig` 搜索 `CONFIG_PACKAGE_kmod-fast-classifier` 或 `kmod-sfe` 确认
+
+- [x] `kmod-hwmon-pwmfan` → 已注释（ImmortalWrt 6.6 内核中依赖不兼容）
+- [x] `libustream-mbedtls` 冲突 → post-defconfig sed 删除（luci-ssl 默认依赖 mbedtls 与 wpad-openssl 的 openssl 冲突）
 
 ### 构建运行中验证
 - [ ] `CONFIG_TARGET_x86_64_DEVICE_generic` 实际名称（`make defconfig` 报错时可修正）

@@ -130,6 +130,10 @@ curl -s https://$mirror/openwrt/23-config-common-custom >> .config
 rm -rf tmp/*
 make defconfig
 
+# resolve ustream SSL conflict: luci-ssl defaults to mbedtls, but wpad-openssl pulls in openssl variant
+# post-defconfig removal forces both luci-ssl and wpad to use libustream-openssl exclusively
+sed -i '/CONFIG_PACKAGE_libustream-mbedtls=y/d' .config
+
 # compile
 echo -e "\r\n${GREEN_COLOR}Building ImmortalWrt ...${RES}\r\n"
 make -j$cores IGNORE_ERRORS="n m"
