@@ -2,24 +2,32 @@
 
 ### Add new packages or patches below
 
-# openlist - add new package
-git clone https://$github/sbwml/luci-app-openlist2 package/new/openlist
+# openlist - multi-package repo, extract only luci-app-openlist2
+git clone --depth=1 https://$github/sbwml/luci-app-openlist2 /tmp/luci-app-openlist2
+cp -r /tmp/luci-app-openlist2/luci-app-openlist2 package/new/luci-app-openlist2
+rm -rf /tmp/luci-app-openlist2
 
-# lrzsz - add patched package
+# lrzsz - add patched package (single-package repo, root IS package)
 rm -rf feeds/packages/utils/lrzsz
-git clone https://$github/sbwml/packages_utils_lrzsz package/new/lrzsz
+git clone --depth=1 https://$github/sbwml/packages_utils_lrzsz package/new/lrzsz
 
-# mosdns LuCI (mosdns backend is in ImmortalWrt packages)
-git clone https://$github/sbwml/luci-app-mosdns -b v5 package/new/mosdns
+# mosdns LuCI - multi-package repo, extract only luci-app-mosdns
+# (mosdns & v2dat subdirs would fail without golang toolchain)
+git clone --depth=1 https://$github/sbwml/luci-app-mosdns -b v5 /tmp/luci-app-mosdns
+cp -r /tmp/luci-app-mosdns/luci-app-mosdns package/new/luci-app-mosdns
+rm -rf /tmp/luci-app-mosdns
 
-# tailscale-ng LuCI (tailscale backend is in ImmortalWrt packages)
-git clone https://$github/vad-b/luci-app-tailscale-ng package/new/luci-app-tailscale-ng
+# tailscale-ng LuCI (single-package repo)
+git clone --depth=1 https://$github/vad-b/luci-app-tailscale-ng package/new/luci-app-tailscale-ng
 
-# eqosplus LuCI
-git clone https://$github/sirpdboy/luci-app-eqosplus package/new/luci-app-eqosplus
+# eqosplus LuCI (single-package repo)
+git clone --depth=1 https://$github/sirpdboy/luci-app-eqosplus package/new/luci-app-eqosplus
 
-# netspeedtest LuCI
-git clone https://$github/sirpdboy/netspeedtest package/new/netspeedtest
+# netspeedtest LuCI - multi-package repo, extract only luci-app-netspeedtest
+# (homebox & ookla-speedtest subdirs are not needed)
+git clone --depth=1 https://$github/sirpdboy/netspeedtest /tmp/netspeedtest
+cp -r /tmp/netspeedtest/luci-app-netspeedtest package/new/luci-app-netspeedtest
+rm -rf /tmp/netspeedtest
 
 # natfrp - prebuilt IPK injection (official recommendation)
 mkdir -p files/natfrp

@@ -347,11 +347,11 @@ CONFIG_PACKAGE_luci-app-ddns-go=y
 
 | 包名 | 来源 | 状态 | 说明 |
 |------|------|------|------|
-| `luci-app-mosdns` | `sbwml/luci-app-mosdns` | ✅ v5.3.4-r3 (2026-04) | 1.7k stars, 分支 `v5` |
-| `luci-app-tailscale`→`luci-app-tailscale-ng` | `vad-b/luci-app-tailscale-ng` | ✅ v2026-02 | 7 stars, 非侵入式，不替换 tailscale 原生文件 |
+| `luci-app-mosdns` | `sbwml/luci-app-mosdns` | ✅ v5.3.4-r3 (2026-04) | ⚠️ 多包仓库，需提取 `luci-app-mosdns/` 子目录 |
+| `luci-app-tailscale`→`luci-app-tailscale-ng` | `vad-b/luci-app-tailscale-ng` | ✅ v2026-02 | 单包仓库，直接 clone |
 | `luci-app-socat` | — | ❌ 暂不集成 | 由用户决定后续是否需要 |
-| `luci-app-eqosplus` | `sirpdboy/luci-app-eqosplus` | ✅ v1.3.0 (2025-12) | 120 stars |
-| `luci-app-netspeedtest` | `sirpdboy/netspeedtest` | ✅ v5.2.1 (2026-03) | 20 stars, 含 homebox/ookla-speedtest |
+| `luci-app-eqosplus` | `sirpdboy/luci-app-eqosplus` | ✅ v1.3.0 (2025-12) | 单包仓库，直接 clone |
+| `luci-app-netspeedtest` | `sirpdboy/netspeedtest` | ✅ v5.2.1 (2026-03) | ⚠️ 多包仓库，需提取 `luci-app-netspeedtest/` 子目录 |
 | `luci-app-wolplus` | ~~animegasan~~ → **用内置** | ❌→✅ | 改换 ImmortalWrt 内置 `luci-app-wol` |
 
 集成方式：在 `06-custom.sh` 中 `git clone` 到 `package/new/`
@@ -409,12 +409,14 @@ CONFIG_PACKAGE_luci-app-natfrp=y            # 从源编译（见第六阶段 nat
 ```bash
 #!/bin/bash -e
 
-# openlist
-git clone https://github.com/sbwml/luci-app-openlist2 package/new/openlist
+# openlist - multi-package repo, extract only luci-app-openlist2
+git clone --depth=1 https://$github/sbwml/luci-app-openlist2 /tmp/luci-app-openlist2
+cp -r /tmp/luci-app-openlist2/luci-app-openlist2 package/new/luci-app-openlist2
+rm -rf /tmp/luci-app-openlist2
 
-# lrzsz
+# lrzsz - add patched package (single-package repo, root IS package)
 rm -rf feeds/packages/utils/lrzsz
-git clone https://github.com/sbwml/packages_utils_lrzsz package/new/lrzsz
+git clone --depth=1 https://$github/sbwml/packages_utils_lrzsz package/new/lrzsz
 ```
 
 ### 需要移除的内容
@@ -426,19 +428,26 @@ git clone https://github.com/sbwml/packages_utils_lrzsz package/new/lrzsz
 
 ### 新增：缺失 LuCI 包的第三方源
 
+> ⚠️ 部分第三方仓库是**多包仓库**（一个仓库包含多个子包），直接 clone 到 `package/new/` 会导致 `make` 尝试编译所有子目录，可能因缺少依赖（如 golang）而失败。以下使用"提取子目录"模式。
+
 ```bash
-# mosdns LuCI（后端 mosdns 已在 ImmortalWrt packages 中）
-git clone https://github.com/sbwml/luci-app-mosdns -b v5 package/new/mosdns
+# mosdns LuCI — 多包仓库，提取 luci-app-mosdns 子目录
+# (mosdns/ 与 v2dat/ 子目录不需要，v2dat 会因缺少 golang 编译失败)
+git clone --depth=1 https://$github/sbwml/luci-app-mosdns -b v5 /tmp/luci-app-mosdns
+cp -r /tmp/luci-app-mosdns/luci-app-mosdns package/new/luci-app-mosdns
+rm -rf /tmp/luci-app-mosdns
 
-# tailscale LuCI（后端 tailscale 已在 ImmortalWrt packages 中）
-# 注意：包名为 luci-app-tailscale-ng (非 -tailscale)
-git clone https://github.com/vad-b/luci-app-tailscale-ng package/new/luci-app-tailscale-ng
+# tailscale-ng LuCI（单包仓库，root 即为包）
+git clone --depth=1 https://$github/vad-b/luci-app-tailscale-ng package/new/luci-app-tailscale-ng
 
-# eqosplus LuCI
-git clone https://github.com/sirpdboy/luci-app-eqosplus package/new/luci-app-eqosplus
+# eqosplus LuCI（单包仓库）
+git clone --depth=1 https://$github/sirpdboy/luci-app-eqosplus package/new/luci-app-eqosplus
 
-# netspeedtest LuCI
-git clone https://github.com/sirpdboy/netspeedtest package/new/netspeedtest
+# netspeedtest LuCI — 多包仓库，提取 luci-app-netspeedtest 子目录
+# (homebox/ 与 ookla-speedtest/ 子目录不需要)
+git clone --depth=1 https://$github/sirpdboy/netspeedtest /tmp/netspeedtest
+cp -r /tmp/netspeedtest/luci-app-netspeedtest package/new/luci-app-netspeedtest
+rm -rf /tmp/netspeedtest
 
 # socat — 暂不集成
 ```
