@@ -107,6 +107,7 @@ curl -sO https://$mirror/openwrt/scripts/06-custom.sh
 chmod 0755 06-custom.sh
 [ "$(whoami)" = "runner" ] && group "patching openwrt"
 bash 06-custom.sh
+./scripts/feeds update -i
 [ "$(whoami)" = "runner" ] && endgroup
 
 rm -f 06-custom.sh

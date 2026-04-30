@@ -6,13 +6,20 @@
 rm -rf feeds/packages/utils/lrzsz
 git clone --depth=1 https://$github/sbwml/packages_utils_lrzsz package/new/lrzsz
 
-# mosdns LuCI - multi-package repo, extract only luci-app-mosdns
-# (mosdns & v2dat subdirs would fail without golang toolchain)
-git clone --depth=1 https://$github/sbwml/luci-app-mosdns -b v5 /tmp/luci-app-mosdns
-cp -r /tmp/luci-app-mosdns/luci-app-mosdns package/new/luci-app-mosdns
-rm -rf /tmp/luci-app-mosdns
-# remove v2dat dependency (v2dat is not in our build scope)
-sed -i '/+v2dat/d' package/new/luci-app-mosdns/Makefile
+# mosdns v5 — requires golang 1.24+, full repo (not just luci subdir)
+# remove ImmortalWrt's built-in mosdns and v2ray-geodata to avoid conflicts
+rm -rf package/feeds/packages/mosdns
+rm -rf package/feeds/packages/net/v2ray-geodata
+
+# update golang to 1.24.x (required by mosdns v5)
+rm -rf feeds/packages/lang/golang
+git clone --depth=1 https://github.com/sbwml/packages_lang_golang -b 24.x feeds/packages/lang/golang
+
+# clone full mosdns repo (luci + backend + v2dat)
+git clone --depth=1 https://$github/sbwml/luci-app-mosdns -b v5 package/mosdns
+
+# clone v2ray-geodata (geoip/geosite data for routing rules)
+git clone --depth=1 https://$github/sbwml/v2ray-geodata package/v2ray-geodata
 
 # tailscale-ng LuCI (single-package repo)
 git clone --depth=1 https://$github/vad-b/luci-app-tailscale-ng package/new/luci-app-tailscale-ng

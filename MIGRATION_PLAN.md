@@ -83,7 +83,7 @@
    # ImmortalWrt 默认 192.168.1.1，如需改为 10.0.0.1：
    sed -i 's/192\.168\.1\.1/10.0.0.1/g' package/base-files/files/bin/config_generate
    ```
-7. 下载并执行 `06-custom.sh`
+7. 下载并执行 `06-custom.sh`，执行后 `./scripts/feeds update -i` 刷新索引
 8. 组装 `.config`：
    - 从你的 repo 下载 `23-config-musl-x86`（设备配置）
    - 下载 `23-config-common-base`（基础系统配置）
@@ -349,7 +349,7 @@ CONFIG_PACKAGE_luci-app-ddns-go=y
 
 | 包名 | 来源 | 状态 | 说明 |
 |------|------|------|------|
-| `luci-app-mosdns` | `sbwml/luci-app-mosdns` | ✅ v5.3.4-r3 (2026-04) | ⚠️ 多包仓库，需提取 `luci-app-mosdns/` 子目录 |
+| `luci-app-mosdns` | `sbwml/luci-app-mosdns` | ✅ v5.3.4-r3 (2026-04) | ⚠️ 多包仓库，需完整 clone + golang 1.24+ |
 | `luci-app-tailscale`→`luci-app-tailscale-ng` | `vad-b/luci-app-tailscale-ng` | ✅ v2026-02 | 单包仓库，直接 clone |
 | `luci-app-socat` | — | ❌ 暂不集成 | 由用户决定后续是否需要 |
 | `luci-app-eqosplus` | `sirpdboy/luci-app-eqosplus` | ✅ v1.3.0 (2025-12) | 单包仓库，直接 clone |
@@ -425,16 +425,23 @@ git clone --depth=1 https://$github/sbwml/packages_utils_lrzsz package/new/lrzsz
 
 ### 新增：缺失 LuCI 包的第三方源
 
-> ⚠️ 部分第三方仓库是**多包仓库**（一个仓库包含多个子包），直接 clone 到 `package/new/` 会导致 `make` 尝试编译所有子目录，可能因缺少依赖（如 golang）而失败。以下使用"提取子目录"模式。
+> ⚠️ 部分第三方仓库是**多包仓库**。`luci-app-mosdns` 需要**整个仓库**而非只提取 LuCI 子目录，因为 mosdns 后端需要配套的 v5 版本二进制。`netspeedtest` 只需提取 `luci-app-netspeedtest/` 子目录。
 
 ```bash
-# mosdns LuCI — 多包仓库，提取 luci-app-mosdns 子目录
-# (mosdns/ 与 v2dat/ 子目录不需要，v2dat 会因缺少 golang 编译失败)
-git clone --depth=1 https://$github/sbwml/luci-app-mosdns -b v5 /tmp/luci-app-mosdns
-cp -r /tmp/luci-app-mosdns/luci-app-mosdns package/new/luci-app-mosdns
-rm -rf /tmp/luci-app-mosdns
-# remove v2dat dependency (v2dat is not in our build scope)
-sed -i '/+v2dat/d' package/new/luci-app-mosdns/Makefile
+# mosdns v5 — 需要完整仓库（luci + mosdns 后端 + v2dat）+ golang 1.24+
+# 先删除 ImmortalWrt 自带的旧版 mosdns / v2ray-geodata
+rm -rf package/feeds/packages/mosdns
+rm -rf package/feeds/packages/net/v2ray-geodata
+
+# 更新 golang 到 1.24.x（mosdns v5 必需）
+rm -rf feeds/packages/lang/golang
+git clone --depth=1 https://github.com/sbwml/packages_lang_golang -b 24.x feeds/packages/lang/golang
+
+# clone 完整 mosdns 仓库（luci-app-mosdns + mosdns 后端 + v2dat）
+git clone --depth=1 https://$github/sbwml/luci-app-mosdns -b v5 package/mosdns
+
+# clone v2ray-geodata（geoip/geosite 规则数据）
+git clone --depth=1 https://$github/sbwml/v2ray-geodata package/v2ray-geodata
 
 # tailscale-ng LuCI（单包仓库，root 即为包）
 git clone --depth=1 https://$github/vad-b/luci-app-tailscale-ng package/new/luci-app-tailscale-ng
@@ -445,9 +452,10 @@ git clone --depth=1 https://$github/sirpdboy/luci-app-eqosplus package/new/luci-
 # netspeedtest LuCI — 多包仓库，提取 luci-app-netspeedtest 子目录
 # (homebox/ 与 ookla-speedtest/ 子目录不需要)
 git clone --depth=1 https://$github/sirpdboy/netspeedtest /tmp/netspeedtest
+
 cp -r /tmp/netspeedtest/luci-app-netspeedtest package/new/luci-app-netspeedtest
 rm -rf /tmp/netspeedtest
-# remove unneeded dependencies (homebox & ookla-speedtest)
+# remove unneeded dependencies (homebox & ookla-speedtest are not in build scope)
 sed -i '/+ookla-speedtest/d; /+homebox/d' package/new/luci-app-netspeedtest/Makefile
 
 # socat — 暂不集成
