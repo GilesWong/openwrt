@@ -90,11 +90,6 @@
    - 下载 `23-config-common-custom`（APP 选择）
    - 追加内联编译选项
 9. `make defconfig && make -j$(nproc+1)`
-   - ⚠️ 在 `make defconfig` 之后需执行：
-     ```
-     sed -i '/CONFIG_PACKAGE_libustream-mbedtls=y/d' .config
-     ```
-     原因：`luci-ssl` 默认依赖 `libustream-mbedtls`，`make defconfig` 会强制启用它。但 `wpad-openssl` 已拉入 `libustream-openssl`，两者同名文件冲突。删除 mbedtls 行后，`luci-ssl` 会退而使用 openssl 版本。
 
 ### 移除的 pmkol 特性
 
@@ -221,7 +216,8 @@ CONFIG_PACKAGE_dnsmasq_full_ipset=y
 
 ### LuCI 基础包
 CONFIG_PACKAGE_luci=y
-CONFIG_PACKAGE_luci-ssl=y
+CONFIG_PACKAGE_luci=y
+# CONFIG_PACKAGE_luci-ssl is not set
 CONFIG_PACKAGE_luci-lib-base=y
 CONFIG_PACKAGE_luci-lib-ip=y
 CONFIG_PACKAGE_luci-lib-jsonc=y
@@ -584,7 +580,7 @@ openwrt/
 - [ ] Shortcut-FE 包名：`make menuconfig` 搜索 `CONFIG_PACKAGE_kmod-fast-classifier` 或 `kmod-sfe` 确认
 
 - [x] `kmod-hwmon-pwmfan` → 已注释（ImmortalWrt 6.6 内核中依赖不兼容）
-- [x] `libustream-mbedtls` 冲突 → post-defconfig sed 删除（luci-ssl 默认依赖 mbedtls 与 wpad-openssl 的 openssl 冲突）
+- [x] `libustream-mbedtls` 冲突 → 改用 `CONFIG_PACKAGE_luci`（不用 `luci-ssl`），避免硬编码 mbedtls 依赖
 
 ### 构建运行中验证
 - [ ] `CONFIG_TARGET_x86_64_DEVICE_generic` 实际名称（`make defconfig` 报错时可修正）
