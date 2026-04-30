@@ -80,9 +80,6 @@ else
     exit 1
 fi
 
-# append nikki feed to default feeds.conf
-echo "src-git nikki https://github.com/nikkinikki-org/OpenWrt-nikki.git;main" >> feeds.conf.default
-
 [ "$(whoami)" = "runner" ] && group "feeds update -a"
 ./scripts/feeds update -a
 [ "$(whoami)" = "runner" ] && endgroup

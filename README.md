@@ -26,7 +26,6 @@ https://github.com/GilesWong/openwrt/releases
 ### 固件说明：
 - ImmortalWrt 24.10 + Linux Kernel 6.6 LTS
 - 预装插件：
-  - Nikki (Mihomo)
   - MosDNS
   - Tailscale-ng
   - DDNS-Go
@@ -104,4 +103,3 @@ export CN_PROXY=y
 ### 特别致谢：
 - [ImmortalWrt](https://github.com/immortalwrt/immortalwrt)
 - [OpenWrt](https://github.com/openwrt/openwrt)
-- [Nikki](https://github.com/nikkinikki-org/OpenWrt-nikki)

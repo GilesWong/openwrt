@@ -9,7 +9,6 @@
 ## 关键约束
 
 - **仅 x86_64** — 不再支持 NanoPi R4S/R5S
-- **保留 luci-app-nikki** — 从 `nikkinikki-org/OpenWrt-nikki` feed 引入
 - **ImmortalWrt 默认内核** — 放弃 BBRv3 / LRNG / Shortcut-FE / TCP Brutal 等 pmkol 内核补丁
 - **完全脱离 pmkol 仓库** — 所有 `github.com/pmkol/*` 引用清零
 
@@ -71,11 +70,6 @@
    git clone --depth=1 --branch openwrt-24.10 \
      https://github.com/immortalwrt/immortalwrt openwrt
    cd openwrt
-   ```
-4. 配置 feeds（**在默认 feeds.conf.default 基础上追加** nikki，不替换整个文件）：
-   ```bash
-   # 追加 nikki feed
-   echo "src-git nikki https://github.com/nikkinikki-org/OpenWrt-nikki.git;main" >> feeds.conf.default
    ```
 5. 执行 `./scripts/feeds update -a && ./scripts/feeds install -a`
 6. 配置 LAN IP（默认为 10.0.0.1）：
@@ -358,18 +352,6 @@ CONFIG_PACKAGE_luci-app-ddns-go=y
 
 集成方式：在 `06-custom.sh` 中 `git clone` 到 `package/new/`
 
-#### ❗ 通过 Feed 引入
-
-| 包名 | 来源 |
-|------|------|
-| `luci-app-nikki` | `nikkinikki-org/OpenWrt-nikki` feed（已在 feeds.conf.default 中追加） |
-
-> ⚠️ nikki 额外依赖验证：
-> - `yq` — 命令行 YAML 处理工具，nikki 必需。需确认 ImmortalWrt 24.10 的 packages feed 中是否存在
-> - `ip-full` — nikki 要求，ImmortalWrt 标准包，确认存在
-> - `kmod-dummy`、`kmod-inet-diag`、`kmod-nft-socket`、`kmod-nft-tproxy`、`kmod-tun` — 已在 base config 中配置
-> - `ca-bundle`、`curl`、`firewall4` — ImmortalWrt 标准包
->
 > ⚠️ ImmortalWrt 24.10 / OpenWrt 24.10 已开始切换包管理器从 `opkg` 到 `apk`：
 > - feeds 中部分包的安装方式可能有变化
 > - 内核模块包（`kmod-*`）的 `apk` vs `opkg` 命名规则可能需要适配
@@ -390,9 +372,6 @@ CONFIG_PACKAGE_luci-app-ddns-go=y
 ### 新增块
 
 ```
-### Nikki
-CONFIG_PACKAGE_luci-app-nikki=y
-
 ### 新增（从第三方源拉取的包在 06-custom.sh 中处理）
 CONFIG_PACKAGE_luci-app-mosdns=y
 CONFIG_PACKAGE_luci-app-tailscale-ng=y      # 注意包名：tailscale → tailscale-ng
@@ -537,7 +516,7 @@ openwrt/
 ├── build.sh                     ← 重写：ImmortalWrt 24.10 x86_64 构建
 ├── 23-config-musl-x86           ← 新文件：x86_64 设备配置
 ├── 23-config-common-base        ← 新文件：基础系统配置（含 LuCI/内核/工具）
-├── 23-config-common-custom      ← 修改：APP 选择（去 pmkol 化 + 新增 nikki/natfrp）
+├── 23-config-common-custom      ← 修改：APP 选择（去 pmkol 化 + 新增 natfrp）
 ├── scripts/
 │   └── 06-custom.sh             ← 修改：保留 lrzsz，新增 mosdns/tailscale-ng/eqosplus/netspeedtest + natfrp
 ├── files/
@@ -560,7 +539,7 @@ openwrt/
 | 行号范围 | 内容 | 操作 |
 |----------|------|------|
 | 11 | `https://github.com/pmkol/openwrt-lite/releases` | 改为你的 fork releases 地址 |
-| 8 | `Infinity Nikki` Telegram 群 | 删除或改为你的联系方式 |
+| 8 | `Infinity Nikki` Telegram 群 | 删除 |
 | 4 | 项目描述提到"自动构建的扩展软件源" | 改为 ImmortalWrt 描述 |
 | 34-54 | "固件说明"中内核 6.11.11、Shortcut-FE | 改为 ImmortalWrt 属性 |
 | 58-92 | "版本说明"中 Lite/Thin/Server | 改为你的版本说明（仅 x86_64） |
@@ -573,7 +552,7 @@ openwrt/
 
 - ImmortalWrt 默认登录地址 `192.168.1.1`（或你的 `10.0.0.1`）
 - ImmortalWrt 24.10 基础信息（内核 6.6 LTS）
-- 自定义包列表说明（nikki、mosdns、tailscale-ng 等）
+- 自定义包列表说明（mosdns、tailscale-ng 等）
 - CI 构建说明（仅 x86_64）
 
 ---
@@ -583,7 +562,6 @@ openwrt/
 ### 必须在实施前验证 (Blockers)
 - [ ] ImmortalWrt 分支名：确认 `openwrt-24.10` 是当前维护分支（非 tag `v24.10.6`）
 - [ ] `feeds.conf.default` 默认内容：确认 ImmortalWrt 自带 feeds 指向正确
-- [ ] `yq` 包：确认 ImmortalWrt 24.10 feeds 中是否包含（nikki 硬依赖，缺失则编译失败）
 - [ ] `apk` vs `opkg`：确认 ImmortalWrt 24.10 的包管理器模式，及对 `kmod-*` 命名的影响
 - [ ] Shortcut-FE 包名：`make menuconfig` 搜索 `CONFIG_PACKAGE_kmod-fast-classifier` 或 `kmod-sfe` 确认
 
@@ -603,8 +581,6 @@ openwrt/
 - [x] `vad-b/luci-app-tailscale-ng` — 可用（luci-app-tailscale → luci-app-tailscale-ng）
 - [x] `sirpdboy/luci-app-eqosplus` — 可用
 - [x] `sirpdboy/netspeedtest` — 可用
-- [x] `nikkinikki-org/OpenWrt-nikki` — feed 可用（`;main` 分支）
-- [x] `luci-app-wolplus` → 改为内置 `luci-app-wol`
 - [x] `luci-app-socat` → 暂不集成
 - [x] `luci-app-vlmcsd` → 无需在 06-custom.sh 中拉取（ImmortalWrt 已内置，custom config 中 Enable 即可）
 
